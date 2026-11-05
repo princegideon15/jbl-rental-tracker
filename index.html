@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JBL rental calendar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#faf9f4;--card:#fffefb;--ink:#1c1b19;--mute:#6d6a63;--line:#ebe6e0;--rent:#ff3300;--rent-ink:#ffffff;--free:#eaf0e4;--free-ink:#2f5d2b;--today:#1c1b19;--serif:"Source Serif 4",Georgia,"Times New Roman",serif;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161513;--card:#1f1e1b;--ink:#f1efe8;--mute:#a09c92;--line:#34322d;--rent:#ff3300;--rent-ink:#ffffff;--free:#1f2a1f;--free-ink:#9fd197;--today:#f1efe8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161513;--card:#1f1e1b;--ink:#f1efe8;--mute:#a09c92;--line:#34322d;--rent:#ff3300;--rent-ink:#ffffff;--free:#1f2a1f;--free-ink:#9fd197;--today:#f1efe8;color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;padding:20px clamp(14px,2.5vw,36px);transition:background .2s,color .2s}
+main{width:100%;max-width:none}
+.layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+@media (min-width:900px){.layout{grid-template-columns:minmax(340px,480px) minmax(0,1fr)}}
+@media (min-width:1500px){.layout{grid-template-columns:minmax(380px,540px) minmax(0,1fr)}}
+.left{min-width:0}
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:14px}
+.top::before{content:""}
+h1{font-family:var(--serif);font-size:clamp(1.3rem,4.5vw,1.9rem);font-weight:700;margin:0;letter-spacing:-.01em;text-align:center}
+.tgl{justify-self:end}
+.tgl{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.88rem;font-weight:500;white-space:nowrap}
+.tgl:hover{border-color:var(--rent)}
+.tgl:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.status{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:600;line-height:1.35}
+.status.on{background:var(--rent);color:var(--rent-ink)}
+.status.off{background:var(--free);color:var(--free-ink)}
+.status small{display:block;font-weight:400;opacity:.9;margin-top:2px}
+.cal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.nav b{font-family:var(--serif);font-size:1.15rem;font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer}
+.nav button{background:none;border:1px solid var(--line);border-radius:8px;width:36px;height:36px;font-size:1.1rem}
+.nav button:focus-visible,.d:focus-visible,.row button:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.w{text-align:center;color:var(--mute);font-size:.78rem;padding:4px 0}
+.d{aspect-ratio:1;border:1px solid transparent;border-radius:8px;background:none;font-weight:600;position:relative}
+.d:hover{background:var(--bg)}
+.d.o{visibility:hidden}
+.d.r{background:var(--rent);color:var(--rent-ink)}
+.d.r.s{border-radius:8px 0 0 8px}.d.r.e{border-radius:0 8px 8px 0}.d.r.s.e{border-radius:8px}
+.d.r:not(.s):not(.e){border-radius:0}
+.d.t{border-color:var(--today);box-shadow:inset 0 0 0 1px var(--today)}
+.d.p{outline:2px dashed var(--rent);outline-offset:-3px}
+.hint{color:var(--mute);font-size:.85rem;margin:12px 2px 0;min-height:1.2em}
+.legend{display:flex;gap:14px;font-size:.82rem;color:var(--mute);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.list{margin-top:14px}
+.list h2{font-family:var(--serif);font-size:1rem;margin:0 0 6px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}
+.row button{background:none;border:none;color:var(--mute);text-decoration:underline;font-size:.85rem}
+.share{margin-top:14px;display:none;gap:8px;flex-direction:column}
+.share.on{display:flex}
+.share input{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+.share button{background:var(--rent);color:var(--rent-ink);border:none;border-radius:10px;padding:13px;font-weight:800;font-size:1rem}
+.share button:focus-visible,.share input:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.share label{font-size:.85rem;color:var(--mute)}
+
+.info{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.info h2{font-family:var(--serif);font-size:1.05rem;font-weight:700;margin:0 0 2px}
+.info p.sub{color:var(--mute);font-size:.82rem;margin:0 0 8px}
+.irow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.irow div{min-width:0}
+.irow small{display:block;color:var(--mute);font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.irow span{display:block;font-size:.9rem;line-height:1.35;word-break:break-word;user-select:all}
+.cp{flex:none;background:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.85rem;font-weight:500;min-width:92px}
+.cp:hover{border-color:var(--rent)}
+.cp:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.cp.all{margin-top:10px;width:100%;background:var(--rent);color:var(--rent-ink);border-color:var(--rent);padding:11px;font-weight:700}
+.mon{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.mon h2{font-family:var(--serif);font-size:1.2rem;font-weight:700;margin:0}
+.mon-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.up{background:var(--rent);color:var(--rent-ink);border-radius:10px;padding:10px 14px;font-weight:800;font-size:.92rem;cursor:pointer;display:inline-block}
+.up:focus-within{outline:2px solid var(--rent);outline-offset:2px}
+.up input{position:absolute;opacity:0;width:1px;height:1px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:700px}
+th{text-align:left;color:var(--mute);font-weight:600;font-size:.8rem;padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td input,td textarea{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:6px;padding:6px;width:100%;resize:none}
+td textarea{min-height:48px}
+td input:hover,td textarea:hover{border-color:var(--line)}
+td input:focus,td textarea:focus{outline:2px solid var(--rent);outline-offset:0;background:var(--bg)}
+td.amt input{text-align:right}
+td button{background:none;border:none;color:var(--mute);font-size:1.2rem;padding:4px 8px;border-radius:6px}
+td button:focus-visible{outline:2px solid var(--rent)}
+td button.vw{border:1px solid var(--line);color:var(--ink);font-size:.8rem;font-weight:500;padding:6px 10px;margin-top:2px}
+td button.vw:hover{border-color:var(--rent);color:var(--rent)}
+.nopdf{font-size:.75rem;color:var(--mute);padding:8px 4px;display:inline-block}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:flex;flex-direction:column;padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px))}
+.modal .bar{display:flex;justify-content:flex-end;gap:10px;padding-bottom:8px}
+.modal .bar a,.modal .bar button{background:var(--rent);color:var(--rent-ink);border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:.9rem;text-decoration:none;cursor:pointer}
+.modal iframe{flex:1;width:100%;border:0;border-radius:10px;background:#fff}
+.empty{color:var(--mute);padding:16px 6px;text-align:center}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--free);color:var(--free-ink);font-weight:800}
+.total span:last-child{font-size:1.3rem}
+.total.year{background:var(--rent);color:var(--rent-ink);margin-top:8px}
+.total.year small{display:block;font-weight:500;font-size:.78rem;opacity:.9}
+.note{color:var(--mute);font-size:.82rem;margin:10px 2px 0;min-height:1.2em}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1>JBL rental calendar</h1><button class="tgl" id="theme" type="button" aria-pressed="false">Dark mode</button></div>
+<div class="layout">
+<div class="left">
+<div id="status" class="status" aria-live="polite"></div>
+<section class="cal">
+  <div class="nav">
+    <button id="prev" aria-label="Previous month">&#8249;</button>
+    <b id="title"></b>
+    <button id="next" aria-label="Next month">&#8250;</button>
+  </div>
+  <div class="grid" id="wd"></div>
+  <div class="grid" id="days"></div>
+  <p class="hint" id="hint">Tap a start date, then an end date to mark a rental. Tap a rented date to remove that rental.</p>
+  <div class="legend"><span><i style="background:var(--rent)"></i>Rented</span><span><i style="border:1px solid var(--today)"></i>Today</span></div>
+</section>
+<section class="share on" id="share">
+  <label for="contact">Line shown at the bottom of the image</label>
+  <input id="contact" type="text" maxlength="40" placeholder="BOOK YOUR DATE NOW!">
+  <button id="dl">Download as image</button>
+</section>
+<section class="info" id="info" aria-label="Client details"></section>
+<section class="list" id="list"></section>
+</div>
+<aside class="mon" aria-label="Agreement monitoring">
+  <div class="mon-head">
+    <h2 id="mtitle">Agreements</h2>
+    <label class="up">Upload agreement PDF<input id="pdf" type="file" accept="application/pdf,.pdf" multiple></label>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:27%">Name</th><th>Address</th><th style="width:24%">Rental dates</th><th style="width:14%;text-align:right">Amount</th><th style="width:64px">PDF</th><th style="width:34px"><span class="sr" style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <div class="total"><span id="tlabel">Total profit</span><span id="tval">&#8369;0.00</span></div>
+  <div class="total year"><span><span id="ylabel">Total profit this year</span><small id="ycount"></small></span><span id="yval">&#8369;0.00</span></div>
+  <p class="note" id="note">Each PDF is read in your browser (scanned or screenshot PDFs are read with OCR, which needs internet the first time). Name, address, rental dates and rental fee are filled in and filed under the month the rental starts. Check the fields and fix any that were read wrong.</p>
+</aside>
+</div>
+</main>
+<script>
+(function(){
+var KEY="jbl-rentals-v1",rentals=[],pending=null,view=new Date();
+view=new Date(view.getFullYear(),view.getMonth(),1);
+try{var raw=localStorage.getItem(KEY);if(raw)rentals=JSON.parse(raw)||[]}catch(e){rentals=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(rentals))}catch(e){}}
+function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
+function fmt(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function find(s){for(var i=0;i<rentals.length;i++)if(s>=rentals[i][0]&&s<=rentals[i][1])return i;return -1}
+var todayS=iso(new Date());
+var wd=document.getElementById("wd");
+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(function(n){var e=document.createElement("div");e.className="w";e.textContent=n;wd.appendChild(e)});
+function render(){
+  document.getElementById("title").textContent=view.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  var box=document.getElementById("days");box.innerHTML="";
+  var first=view.getDay(),n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  for(var i=0;i<first;i++){var b=document.createElement("div");b.className="d o";box.appendChild(b)}
+  for(var d=1;d<=n;d++){
+    var s=iso(new Date(view.getFullYear(),view.getMonth(),d)),k=find(s),c="d";
+    if(k>-1){c+=" r";if(s===rentals[k][0]||new Date(view.getFullYear(),view.getMonth(),d).getDay()===0)c+=" s";if(s===rentals[k][1]||new Date(view.getFullYear(),view.getMonth(),d).getDay()===6||d===n)c+=" e"}
+    if(s===todayS)c+=" t";
+    if(s===pending)c+=" p";
+    var el=document.createElement("button");el.className=c;el.textContent=d;el.dataset.s=s;
+    el.setAttribute("aria-label",fmt(s)+(k>-1?", rented":", available"));
+    box.appendChild(el);
+  }
+  status();list();renderAgr();
+}
+function status(){
+  var el=document.getElementById("status"),k=find(todayS);
+  if(k>-1){el.className="status on";el.innerHTML="JBL is rented today<small>Rental runs "+fmt(rentals[k][0])+" to "+fmt(rentals[k][1])+"</small>"}
+  else{
+    var nx=rentals.filter(function(r){return r[0]>todayS}).sort(function(a,b){return a[0]<b[0]?-1:1})[0];
+    el.className="status off";el.innerHTML="JBL is available today"+(nx?"<small>Next rental starts "+fmt(nx[0])+"</small>":"<small>No upcoming rentals</small>")}
+}
+function list(){
+  var L=document.getElementById("list");L.innerHTML="";
+  if(!rentals.length)return;
+  var h=document.createElement("h2");h.textContent="Rentals";L.appendChild(h);
+  rentals.slice().sort(function(a,b){return a[0]<b[0]?-1:1}).forEach(function(r){
+    var row=document.createElement("div");row.className="row";
+    var t=document.createElement("span");t.textContent=fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"");
+    var b=document.createElement("button");b.textContent="Remove";
+    b.onclick=function(){rentals=rentals.filter(function(x){return x!==r&&!(x[0]===r[0]&&x[1]===r[1])});save();render()};
+    row.appendChild(t);row.appendChild(b);L.appendChild(row)});
+}
+document.getElementById("days").addEventListener("click",function(e){
+  var s=e.target.dataset&&e.target.dataset.s;if(!s)return;
+  var hint=document.getElementById("hint"),k=find(s);
+  if(pending){
+    var a=pending<s?pending:s,z=pending<s?s:pending;pending=null;
+    rentals=rentals.filter(function(r){return r[1]<a||r[0]>z});
+    rentals.push([a,z]);save();
+    hint.textContent="Rental added: "+fmt(a)+(a!==z?" to "+fmt(z):"")+".";
+  }else if(k>-1){
+    var r=rentals[k];rentals.splice(k,1);save();
+    hint.textContent="Removed the rental "+fmt(r[0])+" to "+fmt(r[1])+".";
+  }else{pending=s;hint.textContent="Start: "+fmt(s)+". Now tap the end date (tap the same day for a one-day rental)."}
+  render();
+});
+document.getElementById("prev").onclick=function(){view=new Date(view.getFullYear(),view.getMonth()-1,1);render()};
+document.getElementById("next").onclick=function(){view=new Date(view.getFullYear(),view.getMonth()+1,1);render()};
+
+/*PARSE*/
+function cleanV(v){
+  v=String(v||"").split(/\s+[A-Za-z][A-Za-z .\/]{1,28}\s*:/)[0];
+  v=v.replace(/[_]{2,}/g," ").replace(/\.{3,}/g," ").replace(/\s+/g," ").trim().replace(/^[,;:\-\s]+|[,;:\-\s]+$/g,"");
+  return /^[\W_]*$/.test(v)?"":v;
+}
+function hasLabel(l){return /^\s*[A-Za-z][A-Za-z .\/]{1,28}\s*:/.test(l)}
+function field(lines,labels){
+  for(var a=0;a<labels.length;a++){
+    var re=new RegExp("(?:^|\\s)(?:"+labels[a]+")\\s*(?:\\([^)]*\\))?\\s*[:\\-\\u2013]\\s*(.*)$","i");
+    for(var i=0;i<lines.length;i++){
+      var m=re.exec(lines[i]);if(!m)continue;
+      var v=cleanV(m[1]);
+      if(!v&&i+1<lines.length&&!hasLabel(lines[i+1]))v=cleanV(lines[i+1]);
+      if(v)return v;
+    }
+  }
+  return "";
+}
+function toNum(x){var n=parseFloat(String(x).replace(/,/g,""));return isNaN(n)?null:n}
+var MONS="jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec";
+function pad(n){return n<10?"0"+n:""+n}
+function mkDate(y,m,d){return(y>=2000&&y<=2100&&m>=1&&m<=12&&d>=1&&d<=31)?y+"-"+pad(m)+"-"+pad(d):null}
+function datesIn(s){
+  var re=new RegExp("\\b("+MONS+")[a-z]*\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?\\s*,?\\s*(\\d{4})\\b|\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+("+MONS+")[a-z]*\\.?,?\\s+(\\d{4})\\b|\\b(\\d{4})-(\\d{1,2})-(\\d{1,2})\\b|\\b(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\b","gi");
+  var out=[],m,mi=function(x){return MONS.split("|").indexOf(x.slice(0,3).toLowerCase())+1};
+  while((m=re.exec(s))){
+    var d=null;
+    if(m[1])d=mkDate(+m[3],mi(m[1]),+m[2]);
+    else if(m[5])d=mkDate(+m[6],mi(m[5]),+m[4]);
+    else if(m[7])d=mkDate(+m[7],+m[8],+m[9]);
+    else if(m[10]){var x=+m[10],y=+m[11];d=x>12?mkDate(+m[12],y,x):mkDate(+m[12],x,y)}
+    if(d)out.push(d);
+  }
+  return out;
+}
+function findDates(lines,text){
+  var d=[];
+  for(var i=0;i<lines.length&&!d.length;i++){
+    if(!/(rent(al)?\s*(duration|period|dates?)|duration|from)/i.test(lines[i]))continue;
+    d=datesIn(lines[i]);
+    if(d.length===1&&lines[i+1])d=d.concat(datesIn(lines[i+1]).slice(0,1));
+  }
+  if(!d.length)d=datesIn(text).slice(0,2);
+  if(!d.length)return["",""];
+  var a=d[0],z=d[1]||d[0];
+  return a<=z?[a,z]:[z,a];
+}
+var NUMD="(\\d{1,3}(?:,\\d{3})*(?:\\.\\d{1,2})?|\\d+(?:\\.\\d{1,2})?)";
+function lastMoney(v){
+  var g=/\d[\d,]*\.\d{2}/g,m,last=null;
+  while((m=g.exec(v)))last=m[0];
+  if(last)return toNum(last);
+  m=/\d{3,}/.exec(v);return m?toNum(m[0]):null;
+}
+function findAmount(lines,text){
+  var i,n,m;
+  /* 1. the "Rental Fee" row of the payment table (no colon, peso sign may be read as P, or garbled) */
+  for(i=0;i<lines.length;i++){
+    if(/^\W*rental\s+fee\b/i.test(lines[i])){n=lastMoney(lines[i].replace(/^\W*rental\s+fee/i,""));if(n&&n>0)return n}
+  }
+  /* 2. "Selected rate: 24-hour rental - 500.00" */
+  for(i=0;i<lines.length;i++){
+    if(/selected\s+rate/i.test(lines[i])){n=lastMoney(lines[i].replace(/^.*selected\s+rate/i,"").replace(/\d+\s*-?\s*hours?/ig,""));if(n&&n>0)return n}
+  }
+  /* 3. generic "Total: 500" style agreements */
+  var labels=["total\\s+(?:rental\\s+)?(?:amount|fee|payment|price|cost)","total","amount\\s+(?:due|paid|payable)","amount","rental\\s+(?:amount|price|cost)","fee","price"];
+  for(var a=0;a<labels.length;a++){
+    var re=new RegExp("(?:^|\\s)(?:"+labels[a]+")\\s*[:\\-\\u2013]\\s*(.*)$","i");
+    for(i=0;i<lines.length;i++){m=re.exec(lines[i]);if(!m)continue;n=lastMoney(m[1]);if(n&&n>0)return n}
+  }
+  return null;
+}
+function parseAgreement(text){
+  text=String(text||"").replace(/e-?mail\s+address/gi,"email");
+  var lines=text.split(/\n/).map(function(x){return x.trim()}).filter(Boolean);
+  var who="(?:renter|lessee|client|customer|borrower)",dt=findDates(lines,text);
+  return {
+    name:field(lines,["name\\s+of\\s+(?:the\\s+)?"+who,who+"(?:'s)?\\s+name",who,"full\\s+name","name"]),
+    address:field(lines,["complete\\s+address","(?:home|present|permanent|billing|residence)\\s+address","address","residing\\s+at"]),
+    amount:findAmount(lines,text),
+    start:dt[0],end:dt[1]
+  };
+}
+/*ENDPARSE*/
+
+var AKEY=KEY+"-agreements",agr=[];
+try{var ar=localStorage.getItem(AKEY);if(ar)agr=JSON.parse(ar)||[]}catch(e){agr=[]}
+function asave(){try{localStorage.setItem(AKEY,JSON.stringify(agr))}catch(e){}}
+function mkey(){return view.getFullYear()+"-"+(view.getMonth()<9?"0":"")+(view.getMonth()+1)}
+function peso(n){return "\u20B1"+(n||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function mlabel(){return view.toLocaleDateString(undefined,{month:"long",year:"numeric"})}
+function totalNow(){var t=0;agr.forEach(function(a){if(a.month===mkey()&&a.amount)t+=a.amount});return t}
+function yearStats(){var y=String(view.getFullYear()),t=0,c=0;agr.forEach(function(a){if(a.amount&&String(a.month||"").slice(0,4)===y){t+=a.amount;c++}});return{y:y,t:t,c:c}}
+function showTotal(){
+  document.getElementById("tval").textContent=peso(totalNow());
+  var ys=yearStats();
+  document.getElementById("ylabel").textContent="Total profit for "+ys.y;
+  document.getElementById("ycount").textContent=ys.c+(ys.c===1?" rental":" rentals")+" this year";
+  document.getElementById("yval").textContent=peso(ys.t);
+}
+var MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fd(x){var q=x.split("-");return MN[+q[1]-1]+" "+(+q[2])+", "+q[0]}
+function fmtRange(a,z){return !a?"":(!z||z===a)?fd(a):fd(a)+" to "+fd(z)}
+function note(t){document.getElementById("note").textContent=t}
+/* uploaded PDFs are kept in IndexedDB (too big for localStorage) */
+var DBP=null;
+function idb(){
+  if(!DBP)DBP=new Promise(function(res,rej){
+    try{var q=indexedDB.open("jbl-rentals-files",1);
+      q.onupgradeneeded=function(){q.result.createObjectStore("pdfs")};
+      q.onsuccess=function(){res(q.result)};q.onerror=function(){rej(q.error)};
+    }catch(e){rej(e)}
+  });
+  return DBP;
+}
+function idbDo(mode,fn){return idb().then(function(db){return new Promise(function(res,rej){var t=db.transaction("pdfs",mode),r=fn(t.objectStore("pdfs"));t.oncomplete=function(){res(r&&r.result)};t.onerror=t.onabort=function(){rej(t.error)}})})}
+function pdfPut(id,blob){return idbDo("readwrite",function(st){return st.put(blob,String(id))})}
+function pdfGet(id){return idbDo("readonly",function(st){return st.get(String(id))})}
+function pdfDel(id){return idbDo("readwrite",function(st){return st.delete(String(id))}).catch(function(){})}
+function showModal(url){
+  var m=document.createElement("div");m.className="modal";m.setAttribute("role","dialog");m.setAttribute("aria-label","Uploaded PDF");
+  var bar=document.createElement("div");bar.className="bar";
+  var a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";a.textContent="Open in new tab";
+  var c=document.createElement("button");c.type="button";c.textContent="Close";c.onclick=function(){document.body.removeChild(m)};
+  bar.appendChild(a);bar.appendChild(c);
+  var f=document.createElement("iframe");f.src=url;f.title="Uploaded PDF";
+  m.appendChild(bar);m.appendChild(f);document.body.appendChild(m);c.focus();
+}
+function viewPdf(a){
+  var w=window.open("","_blank");
+  pdfGet(a.id).then(function(blob){
+    if(!blob){if(w)w.close();note("The PDF for this row is not saved in this browser. Upload it again to attach it.");return}
+    var url=URL.createObjectURL(blob);
+    if(w)w.location.href=url;else showModal(url);
+  }).catch(function(){if(w)w.close();note("Could not open the saved PDF.")});
+}
+/* keep the calendar ticks in step with an agreement's dates */
+function syncRental(oS,oE,nS,nE){
+  if(oS&&oE)rentals=rentals.filter(function(r){return !(r[0]===oS&&r[1]===oE)});
+  var overlap=false;
+  if(nS&&nE){
+    if(!rentals.some(function(r){return r[0]===nS&&r[1]===nE})){
+      overlap=rentals.some(function(r){return r[0]<=nE&&r[1]>=nS});
+      rentals.push([nS,nE]);
+    }
+  }
+  save();return overlap;
+}
+function renderAgr(){
+  document.getElementById("mtitle").textContent="Agreements, "+mlabel();
+  document.getElementById("tlabel").textContent="Total profit for "+mlabel();
+  var tb=document.getElementById("rows");tb.innerHTML="";
+  var list=agr.filter(function(a){return a.month===mkey()});
+  if(!list.length){var tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.className="empty";td.textContent="No agreements for "+mlabel()+". Upload a PDF to add one.";tr.appendChild(td);tb.appendChild(tr)}
+  list.forEach(function(a){
+    var tr=document.createElement("tr");
+    function cell(cls,el){var td=document.createElement("td");if(cls)td.className=cls;td.appendChild(el);tr.appendChild(td);return el}
+    var n=cell("",document.createElement("input"));n.type="text";n.value=a.name||"";n.setAttribute("aria-label","Name");
+    n.onchange=function(){a.name=n.value;asave()};
+    var ad=cell("",document.createElement("textarea"));ad.rows=2;ad.value=a.address||"";ad.setAttribute("aria-label","Address");
+    ad.onchange=function(){a.address=ad.value;asave()};
+    var dr=cell("",document.createElement("textarea"));dr.rows=2;dr.value=fmtRange(a.start,a.end);dr.setAttribute("aria-label","Rental dates");dr.placeholder="Oct 10, 2026 to Oct 11, 2026";
+    dr.onchange=function(){
+      var v=dr.value.trim();
+      var oS=a.start,oE=a.end;
+      if(!v){a.start="";a.end="";asave();syncRental(oS,oE,"","");render();return}
+      var d=findDates([v],v);
+      if(d[0]){a.start=d[0];a.end=d[1];a.month=a.start.slice(0,7);asave();syncRental(oS,oE,a.start,a.end);render()}
+      else{dr.value=fmtRange(a.start,a.end);note("Could not read that date. Use a format like Oct 10, 2026 to Oct 11, 2026.")}
+    };
+    var am=cell("amt",document.createElement("input"));am.type="text";am.inputMode="decimal";am.setAttribute("aria-label","Amount");
+    am.value=a.amount?a.amount.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}):"";
+    am.oninput=function(){a.amount=toNum(am.value.replace(/[^\d.,]/g,""));showTotal()};
+    am.onchange=function(){asave();am.value=a.amount?a.amount.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}):""};
+    if(a.hasPdf){var vb=cell("",document.createElement("button"));vb.type="button";vb.className="vw";vb.textContent="View";vb.setAttribute("aria-label","View uploaded PDF for "+(a.name||"this agreement"));vb.onclick=function(){viewPdf(a)}}
+    else{var ns=cell("",document.createElement("span"));ns.className="nopdf";ns.textContent="No file"}
+    var rm=cell("",document.createElement("button"));rm.textContent="\u00D7";rm.setAttribute("aria-label","Remove agreement");
+    rm.onclick=function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()};
+    tb.appendChild(tr);
+  });
+  showTotal();
+}
+var pdfP=null;
+function loadScript(u){return new Promise(function(res,rej){var t=document.createElement("script");t.src=u;t.onload=res;t.onerror=function(){rej(new Error("load"))};document.head.appendChild(t)})}
+function loadPdf(){
+  if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
+  if(!pdfP){var B="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+    pdfP=loadScript(B+"pdf.worker.min.js").then(function(){return loadScript(B+"pdf.min.js")}).then(function(){window.pdfjsLib.GlobalWorkerOptions.workerSrc=B+"pdf.worker.min.js";return window.pdfjsLib}).catch(function(e){pdfP=null;throw e});}
+  return pdfP;
+}
+var tessP=null;
+function loadTess(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  if(!tessP)tessP=loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js").then(function(){return window.Tesseract}).catch(function(e){tessP=null;throw e});
+  return tessP;
+}
+function ocrDoc(doc,prog){
+  var worker=null,out=[];
+  return loadTess().then(function(T){prog("Loading the text reader (first time only)...");return T.createWorker("eng",1)}).then(function(w){
+    worker=w;return worker.setParameters({tessedit_pageseg_mode:"6"});
+  }).then(function(){
+    var p=Promise.resolve();
+    for(var i=1;i<=doc.numPages;i++)(function(i){
+      p=p.then(function(){prog("Reading page "+i+" of "+doc.numPages+"...");return doc.getPage(i)}).then(function(pg){
+        var vp=pg.getViewport({scale:2.7}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;
+        return pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise.then(function(){return worker.recognize(c)});
+      }).then(function(r){out.push(r.data.text)});
+    })(i);
+    return p;
+  }).then(function(){worker.terminate();return out.join("\n")},function(e){try{if(worker)worker.terminate()}catch(x){}throw e});
+}
+function pdfText(file,prog){
+  var pdfDoc=null;
+  return Promise.all([loadPdf(),file.arrayBuffer()]).then(function(r){
+    return r[0].getDocument({data:r[1]}).promise;
+  }).then(function(doc){
+    pdfDoc=doc;
+    var out=[],p=Promise.resolve();
+    for(var i=1;i<=doc.numPages;i++)(function(i){p=p.then(function(){return doc.getPage(i)}).then(function(pg){return pg.getTextContent()}).then(function(tc){out.push(rowsToText(tc.items))})})(i);
+    return p.then(function(){return out.join("\n")});
+  }).then(function(txt){
+    if(txt.replace(/\s/g,"").length>=60)return txt;
+    return ocrDoc(pdfDoc,prog);
+  });
+}
+function rowsToText(items){
+  var rows=[];
+  items.forEach(function(it){
+    if(!it.str)return;var y=it.transform[5],x=it.transform[4],r=null;
+    for(var i=0;i<rows.length;i++)if(Math.abs(rows[i].y-y)<=3){r=rows[i];break}
+    if(!r){r={y:y,it:[]};rows.push(r)}
+    r.it.push({x:x,w:it.width||0,s:it.str});
+  });
+  rows.sort(function(a,b){return b.y-a.y});
+  return rows.map(function(r){
+    r.it.sort(function(a,b){return a.x-b.x});
+    var line="",end=null;
+    r.it.forEach(function(t){
+      if(end!==null&&t.x-end>1.5&&!/\s$/.test(line)&&!/^\s/.test(t.s))line+=" ";
+      line+=t.s;end=t.x+t.w;
+    });
+    return line;
+  }).join("\n");
+}
+function keepPdf(row,f){
+  return pdfPut(row.id,new Blob([f],{type:"application/pdf"})).then(function(){row.hasPdf=true},function(){});
+}
+document.getElementById("pdf").addEventListener("change",function(e){
+  var files=Array.prototype.slice.call(e.target.files||[]);e.target.value="";
+  var chain=Promise.resolve(),msgs=[],jump="";
+  files.forEach(function(f){
+    chain=chain.then(function(){
+      note("Reading "+f.name+"...");
+      return pdfText(f,note).then(function(t){
+        var d=parseAgreement(t),got=[d.name,d.address,d.amount,d.start].filter(function(x){return x}).length;
+        var row={id:Date.now()+Math.random(),name:d.name,address:d.address,amount:d.amount,start:d.start,end:d.end,month:d.start?d.start.slice(0,7):mkey(),file:f.name,hasPdf:false};
+        agr.push(row);
+        if(d.start)jump=d.start;
+        var ov=d.start?syncRental("","",d.start,d.end):false;
+        msgs.push((got===4?f.name+": added.":got>0?f.name+": added, but some fields were not found. Please fill them in.":f.name+": no readable text found. Fill in the row by hand.")+(d.start?" Dates ticked on the calendar"+(ov?" (they overlap another rental)":"")+".":""));
+        return keepPdf(row,f);
+      }).catch(function(){
+        var row={id:Date.now()+Math.random(),name:"",address:"",amount:null,start:"",end:"",month:mkey(),file:f.name,hasPdf:false};
+        agr.push(row);
+        msgs.push(f.name+": could not be read (the text reader needs internet the first time). Fill in the row by hand.");
+        return keepPdf(row,f);
+      });
+    });
+  });
+  chain.then(function(){
+    asave();
+    if(jump)view=new Date(+jump.slice(0,4),+jump.slice(5,7)-1,1);
+    render();
+    if(msgs.length)note(msgs.join(" ")+" Shown under "+mlabel()+".");
+  });
+});
+/* theme toggle */
+var TK=KEY+"-theme",tbtn=document.getElementById("theme"),root=document.documentElement;
+function setTheme(t,keep){
+  root.setAttribute("data-theme",t);
+  tbtn.textContent=t==="dark"?"Light mode":"Dark mode";tbtn.setAttribute("aria-pressed",t==="dark"?"true":"false");
+  if(keep)try{localStorage.setItem(TK,t)}catch(e){}
+}
+var savedT=null;try{savedT=localStorage.getItem(TK)}catch(e){}
+setTheme(savedT||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),false);
+tbtn.onclick=function(){setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark",true)};
+/* client details to copy */
+var INFO=[
+  {l:"Agreement builder",v:"https://rentmyjbl.vercel.app/"},
+  {l:"Google Maps link",v:"https://maps.app.goo.gl/zdfpsqzUCbTpfeny7"},
+  {l:"Exact address",v:"B25 L65, Mt. Carmel St., San Antonio South, Brgy. Langkiwa, Binan City, Laguna"}
+];
+function copyText(t,btn){
+  var old=btn.dataset.l||btn.textContent;btn.dataset.l=old;
+  function done(ok){btn.textContent=ok?"Copied!":"Select + copy";setTimeout(function(){btn.textContent=old},1700)}
+  function fb(){var ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}document.body.removeChild(ta);done(ok)}
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(function(){done(true)},fb);else fb();
+}
+(function(){
+  var box=document.getElementById("info"),h=document.createElement("h2"),sub=document.createElement("p");
+  h.textContent="Send to clients";sub.className="sub";sub.textContent="Tap Copy, then paste it into your chat.";
+  box.appendChild(h);box.appendChild(sub);
+  INFO.forEach(function(it){
+    var r=document.createElement("div");r.className="irow";
+    var d=document.createElement("div"),sm=document.createElement("small"),sp=document.createElement("span");
+    sm.textContent=it.l;sp.textContent=it.v;d.appendChild(sm);d.appendChild(sp);
+    var b=document.createElement("button");b.type="button";b.className="cp";b.textContent="Copy";b.setAttribute("aria-label","Copy "+it.l);
+    b.onclick=function(){copyText(it.v,b)};
+    r.appendChild(d);r.appendChild(b);box.appendChild(r);
+  });
+  var all=document.createElement("button");all.type="button";all.className="cp all";all.textContent="Copy all";
+  all.onclick=function(){copyText("Rental agreement form: "+INFO[0].v+"\nPick-up address: "+INFO[2].v+"\nGoogle Maps: "+INFO[1].v,all)};
+  box.appendChild(all);
+})();
+var contact=document.getElementById("contact");
+try{contact.value=localStorage.getItem(KEY+"-contact2")||""}catch(e){}
+contact.addEventListener("input",function(){try{localStorage.setItem(KEY+"-contact2",contact.value)}catch(e){}});
+var dls=null;
+try{if(window.claude&&window.claude.use)window.claude.use("downloads").then(function(d){dls=d;if(d)document.getElementById("share").classList.add("on")}).catch(function(){})}catch(e){}
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+function poster(){
+  var F='"Space Grotesk",system-ui,sans-serif',FS='"Source Serif 4",Georgia,serif',W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;
+  var g=c.getContext("2d");
+  g.fillStyle="#ff3300";g.fillRect(0,0,W,H);
+  g.fillStyle="#ffffff";g.textBaseline="alphabetic";
+  var ht=view.toLocaleDateString(undefined,{month:"long",year:"numeric"}),hs=120;
+  g.font="700 "+hs+"px "+FS;
+  while(g.measureText(ht).width>940&&hs>60){hs-=4;g.font="700 "+hs+"px "+FS}
+  g.fillText(ht,70,175);
+  rr(g,40,260,1000,960,36);g.fillStyle="#fffefb";g.fill();g.strokeStyle="#ebe6e0";g.lineWidth=3;g.stroke();
+  var cw=134,x0=71,y0=300;
+  g.textAlign="center";g.fillStyle="#6d6a63";g.font="500 28px "+F;
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(function(n,i){g.fillText(n,x0+i*cw+cw/2,y0+30)});
+  var first=view.getDay(),n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),rh=120;
+  g.font="700 42px "+F;
+  for(var d=1;d<=n;d++){
+    var i=first+d-1,col=i%7,row=Math.floor(i/7),cx=x0+col*cw,cy=y0+54+row*rh;
+    var st=iso(new Date(view.getFullYear(),view.getMonth(),d)),booked=find(st)>-1;
+    if(booked){rr(g,cx+6,cy+6,cw-12,rh-12,20);g.fillStyle="#ff3300";g.fill();g.fillStyle="#ffffff"}
+    else g.fillStyle="#1c1b19";
+    g.fillText(String(d),cx+cw/2,cy+rh/2+15);
+  }
+  g.textAlign="left";
+  rr(g,70,1135,34,34,9);g.fillStyle="#ff3300";g.fill();
+  g.fillStyle="#1c1b19";g.font="500 30px "+F;g.fillText("Booked",118,1163);
+  g.fillText("All other dates are open",290,1163);
+  var ft=(contact.value||"BOOK YOUR DATE NOW!").slice(0,40),fs=64;
+  g.fillStyle="#ffffff";g.font="700 "+fs+"px "+FS;
+  while(g.measureText(ft).width>940&&fs>30){fs-=2;g.font="700 "+fs+"px "+FS}
+  g.fillText(ft,70,1295);
+  return c;
+}
+document.getElementById("dl").onclick=function(){
+  var hint=document.getElementById("hint");
+  (document.fonts&&document.fonts.load?Promise.all([document.fonts.load("700 40px \"Source Serif 4\""),document.fonts.load("500 40px \"Space Grotesk\"")]):Promise.resolve()).catch(function(){}).then(function(){
+    poster().toBlob(function(b){
+      if(!b){hint.textContent="Could not create the image. Try again.";return}
+      var m=view.getFullYear()+"-"+(view.getMonth()<9?"0":"")+(view.getMonth()+1);
+      var fn="jbl-availability-"+m+".png";
+      if(dls){dls.save({filename:fn,data:b}).then(function(){hint.textContent="Image saved. Post it with your caption."}).catch(function(e){if(e&&e.code!=="declined")hint.textContent="Download is not available right now."});return}
+      try{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},4000);hint.textContent="Image downloaded. Post it with your caption."}catch(e){hint.textContent="Download is not available right now."}
+    },"image/png");
+  });
+};
+render();
+})();
+</script>
+</body>
+</html>
