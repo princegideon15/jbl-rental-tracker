@@ -101,6 +101,35 @@ td button.vw:hover{border-color:var(--rent);color:var(--rent)}
 .total.year{background:var(--rent);color:var(--rent-ink);margin-top:8px}
 .total.year small{display:block;font-weight:500;font-size:.78rem;opacity:.9}
 .note{color:var(--mute);font-size:.82rem;margin:10px 2px 0;min-height:1.2em}
+.irow span a{color:var(--rent);text-decoration:underline;font-weight:600}
+.acts{display:flex;flex-direction:row;gap:6px;flex:none}
+.cp.ic{min-width:0;width:42px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.cp svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.allrow .cp{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btnrow{display:flex;gap:8px}
+.btnrow button{flex:1;min-width:0;padding:13px 8px;font-size:.92rem;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btnrow svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cp.ms{background:#0a7cff;border-color:#0a7cff;color:#fff}
+.allrow{display:flex;gap:8px;margin-top:10px}
+.allrow .cp{margin-top:0;width:auto;flex:1}
+.share button.msg{background:#0a7cff;color:#fff}
+.mon-btns{display:flex;gap:8px;flex-wrap:wrap}
+.add{background:none;border:2px solid var(--rent);color:var(--rent);border-radius:10px;padding:8px 14px;font-weight:800;font-size:.92rem}
+.add:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+td label.att{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.8rem;font-weight:500;cursor:pointer;margin-top:2px;white-space:nowrap}
+td label.att:hover{border-color:var(--rent);color:var(--rent)}
+td label.att:focus-within{outline:2px solid var(--rent)}
+td label.att input{position:absolute;opacity:0;width:1px;height:1px}
+.sheet{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+.sbox{background:var(--card);color:var(--ink);width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom,0px))}
+.sbox h3{font-family:var(--serif);font-size:1.1rem;margin:0 0 2px}
+.sbox p{color:var(--mute);font-size:.82rem;margin:0 0 12px;word-break:break-word}
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.sgrid button,.sbox .x{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px;font-weight:600;font-size:.92rem}
+.sgrid button.pri{background:var(--rent);color:var(--rent-ink);border-color:var(--rent)}
+.sgrid button:hover,.sbox .x:hover{border-color:var(--rent)}
+.sbox .x{width:100%;margin-top:10px}
+.sgrid button:focus-visible,.sbox .x:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -123,7 +152,7 @@ td button.vw:hover{border-color:var(--rent);color:var(--rent)}
 <section class="share on" id="share">
   <label for="contact">Line shown at the bottom of the image</label>
   <input id="contact" type="text" maxlength="40" placeholder="BOOK YOUR DATE NOW!">
-  <button id="dl">Download as image</button>
+  <div class="btnrow"><button id="dl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download image</button><button id="shimg" class="msg" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg>Share image</button></div>
 </section>
 <section class="info" id="info" aria-label="Client details"></section>
 <section class="list" id="list"></section>
@@ -131,15 +160,15 @@ td button.vw:hover{border-color:var(--rent);color:var(--rent)}
 <aside class="mon" aria-label="Agreement monitoring">
   <div class="mon-head">
     <h2 id="mtitle">Agreements</h2>
-    <label class="up">Upload agreement PDF<input id="pdf" type="file" accept="application/pdf,.pdf" multiple></label>
+    <div class="mon-btns"><button class="add" id="addrow" type="button">+ Add manually</button><label class="up">Upload PDF or image<input id="pdf" type="file" accept="application/pdf,.pdf,image/*" multiple></label></div>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:27%">Name</th><th>Address</th><th style="width:24%">Rental dates</th><th style="width:14%;text-align:right">Amount</th><th style="width:64px">PDF</th><th style="width:34px"><span class="sr" style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
+    <thead><tr><th style="width:27%">Name</th><th>Address</th><th style="width:24%">Rental dates</th><th style="width:14%;text-align:right">Amount</th><th style="width:84px">File</th><th style="width:34px"><span class="sr" style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
   <div class="total"><span id="tlabel">Total profit</span><span id="tval">&#8369;0.00</span></div>
   <div class="total year"><span><span id="ylabel">Total profit this year</span><small id="ycount"></small></span><span id="yval">&#8369;0.00</span></div>
-  <p class="note" id="note">Each PDF is read in your browser (scanned or screenshot PDFs are read with OCR, which needs internet the first time). Name, address, rental dates and rental fee are filled in and filed under the month the rental starts. Check the fields and fix any that were read wrong.</p>
+  <p class="note" id="note">Each PDF or image is read in your browser (scanned PDFs and images are read with OCR, which needs internet the first time). Name, address, rental dates and rental fee are filled in and filed under the month the rental starts. No agreement file? Tap + Add manually and type the amount yourself. Check the fields and fix any that were read wrong.</p>
 </aside>
 </div>
 </main>
@@ -360,7 +389,7 @@ function renderAgr(){
   document.getElementById("tlabel").textContent="Total profit for "+mlabel();
   var tb=document.getElementById("rows");tb.innerHTML="";
   var list=agr.filter(function(a){return a.month===mkey()});
-  if(!list.length){var tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.className="empty";td.textContent="No agreements for "+mlabel()+". Upload a PDF to add one.";tr.appendChild(td);tb.appendChild(tr)}
+  if(!list.length){var tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.className="empty";td.textContent="No agreements for "+mlabel()+". Upload a PDF or image, or tap + Add manually.";tr.appendChild(td);tb.appendChild(tr)}
   list.forEach(function(a){
     var tr=document.createElement("tr");
     function cell(cls,el){var td=document.createElement("td");if(cls)td.className=cls;td.appendChild(el);tr.appendChild(td);return el}
@@ -374,7 +403,7 @@ function renderAgr(){
       var oS=a.start,oE=a.end;
       if(!v){a.start="";a.end="";asave();syncRental(oS,oE,"","");render();return}
       var d=findDates([v],v);
-      if(d[0]){a.start=d[0];a.end=d[1];a.month=a.start.slice(0,7);asave();syncRental(oS,oE,a.start,a.end);render()}
+      if(d[0]){a.start=d[0];a.end=d[1];a.month=a.start.slice(0,7);view=new Date(+a.start.slice(0,4),+a.start.slice(5,7)-1,1);asave();syncRental(oS,oE,a.start,a.end);render()}
       else{dr.value=fmtRange(a.start,a.end);note("Could not read that date. Use a format like Oct 10, 2026 to Oct 11, 2026.")}
     };
     var am=cell("amt",document.createElement("input"));am.type="text";am.inputMode="decimal";am.setAttribute("aria-label","Amount");
@@ -382,7 +411,7 @@ function renderAgr(){
     am.oninput=function(){a.amount=toNum(am.value.replace(/[^\d.,]/g,""));showTotal()};
     am.onchange=function(){asave();am.value=a.amount?a.amount.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}):""};
     if(a.hasPdf){var vb=cell("",document.createElement("button"));vb.type="button";vb.className="vw";vb.textContent="View";vb.setAttribute("aria-label","View uploaded PDF for "+(a.name||"this agreement"));vb.onclick=function(){viewPdf(a)}}
-    else{var ns=cell("",document.createElement("span"));ns.className="nopdf";ns.textContent="No file"}
+    else{var at=cell("",document.createElement("label"));at.className="att";at.appendChild(document.createTextNode("Attach"));var ai=document.createElement("input");ai.type="file";ai.accept="application/pdf,.pdf,image/*";ai.setAttribute("aria-label","Attach a PDF or image");ai.onchange=function(){var f=ai.files&&ai.files[0];if(!f)return;a.file=f.name;keepPdf(a,f).then(function(){asave();renderAgr();note(f.name+" attached.")})};at.appendChild(ai)}
     var rm=cell("",document.createElement("button"));rm.textContent="\u00D7";rm.setAttribute("aria-label","Remove agreement");
     rm.onclick=function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()};
     tb.appendChild(tr);
@@ -452,7 +481,7 @@ function rowsToText(items){
   }).join("\n");
 }
 function keepPdf(row,f){
-  return pdfPut(row.id,new Blob([f],{type:"application/pdf"})).then(function(){row.hasPdf=true},function(){});
+  return pdfPut(row.id,new Blob([f],{type:f.type||"application/pdf"})).then(function(){row.hasPdf=true},function(){});
 }
 document.getElementById("pdf").addEventListener("change",function(e){
   var files=Array.prototype.slice.call(e.target.files||[]);e.target.value="";
@@ -460,7 +489,7 @@ document.getElementById("pdf").addEventListener("change",function(e){
   files.forEach(function(f){
     chain=chain.then(function(){
       note("Reading "+f.name+"...");
-      return pdfText(f,note).then(function(t){
+      return (isImg(f)?imageText(f,note):pdfText(f,note)).then(function(t){
         var d=parseAgreement(t),got=[d.name,d.address,d.amount,d.start].filter(function(x){return x}).length;
         var row={id:Date.now()+Math.random(),name:d.name,address:d.address,amount:d.amount,start:d.start,end:d.end,month:d.start?d.start.slice(0,7):mkey(),file:f.name,hasPdf:false};
         agr.push(row);
@@ -495,32 +524,90 @@ setTheme(savedT||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").
 tbtn.onclick=function(){setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark",true)};
 /* client details to copy */
 var INFO=[
-  {l:"Agreement builder",v:"https://rentmyjbl.vercel.app/"},
-  {l:"Google Maps link",v:"https://maps.app.goo.gl/zdfpsqzUCbTpfeny7"},
+  {l:"Agreement builder",v:"https://rentmyjbl.vercel.app/",link:true},
+  {l:"Google Maps link",v:"https://maps.app.goo.gl/zdfpsqzUCbTpfeny7",link:true},
   {l:"Exact address",v:"B25 L65, Mt. Carmel St., San Antonio South, Brgy. Langkiwa, Binan City, Laguna"}
 ];
 function copyText(t,btn){
-  var old=btn.dataset.l||btn.textContent;btn.dataset.l=old;
-  function done(ok){btn.textContent=ok?"Copied!":"Select + copy";setTimeout(function(){btn.textContent=old},1700)}
+  var old=btn.dataset.l||btn.innerHTML;btn.dataset.l=old;
+  function done(ok){if(btn.dataset.ic)btn.innerHTML=ok?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':"!";else btn.textContent=ok?"Copied!":"Select + copy";setTimeout(function(){btn.innerHTML=old},1700)}
   function fb(){var ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}document.body.removeChild(ta);done(ok)}
   if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(function(){done(true)},fb);else fb();
 }
 (function(){
-  var box=document.getElementById("info"),h=document.createElement("h2"),sub=document.createElement("p");
+  var IC_COPY='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',IC_SHARE='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg>',IC_OK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';var box=document.getElementById("info"),h=document.createElement("h2"),sub=document.createElement("p");
   h.textContent="Send to clients";sub.className="sub";sub.textContent="Tap Copy, then paste it into your chat.";
   box.appendChild(h);box.appendChild(sub);
   INFO.forEach(function(it){
     var r=document.createElement("div");r.className="irow";
     var d=document.createElement("div"),sm=document.createElement("small"),sp=document.createElement("span");
-    sm.textContent=it.l;sp.textContent=it.v;d.appendChild(sm);d.appendChild(sp);
-    var b=document.createElement("button");b.type="button";b.className="cp";b.textContent="Copy";b.setAttribute("aria-label","Copy "+it.l);
+    sm.textContent=it.l;if(it.link){var an=document.createElement("a");an.href=it.v;an.target="_blank";an.rel="noopener";an.textContent=it.v;sp.appendChild(an)}else sp.textContent=it.v;d.appendChild(sm);d.appendChild(sp);
+    var b=document.createElement("button");b.type="button";b.className="cp ic";b.innerHTML=IC_COPY;b.dataset.ic="1";b.setAttribute("aria-label","Copy "+it.l);
     b.onclick=function(){copyText(it.v,b)};
-    r.appendChild(d);r.appendChild(b);box.appendChild(r);
+    var acts=document.createElement("div");acts.className="acts";acts.appendChild(b);var mb=document.createElement("button");mb.type="button";mb.className="cp ms ic";mb.innerHTML=IC_SHARE;mb.setAttribute("aria-label","Share "+it.l);mb.onclick=function(){openShare(it.v,it.link?it.v:"",it.l)};acts.appendChild(mb);r.appendChild(d);r.appendChild(acts);box.appendChild(r);
   });
-  var all=document.createElement("button");all.type="button";all.className="cp all";all.textContent="Copy all";
+  var all=document.createElement("button");all.type="button";all.className="cp all";all.innerHTML=IC_COPY+"Copy all";
   all.onclick=function(){copyText("Rental agreement form: "+INFO[0].v+"\nPick-up address: "+INFO[2].v+"\nGoogle Maps: "+INFO[1].v,all)};
-  box.appendChild(all);
+  var allTxt="Rental agreement form: "+INFO[0].v+"\nPick-up address: "+INFO[2].v+"\nGoogle Maps: "+INFO[1].v;var ar=document.createElement("div");ar.className="allrow";ar.appendChild(all);var mall=document.createElement("button");mall.type="button";mall.className="cp ms";mall.innerHTML=IC_SHARE+"Share all";mall.setAttribute("aria-label","Share all details");mall.onclick=function(){openShare(allTxt,"","JBL rental details")};ar.appendChild(mall);box.appendChild(ar);
 })();
+function isImg(f){return /^image\//.test(f.type||"")||/\.(png|jpe?g|webp|gif|bmp|heic|heif)$/i.test(f.name||"")}
+function imageText(file,prog){
+var worker=null;
+return loadTess().then(function(T){prog("Loading the text reader (first time only)...");return T.createWorker("eng",1)}).then(function(w){
+worker=w;return worker.setParameters({tessedit_pageseg_mode:"6"});
+}).then(function(){prog("Reading the image...");return worker.recognize(file)}).then(function(r){worker.terminate();return r.data.text},function(e){try{if(worker)worker.terminate()}catch(x){}throw e});
+}
+function copyRaw(t){return new Promise(function(res){
+function fb(){var ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}document.body.removeChild(ta);res(ok)}
+if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(function(){res(true)},fb);else fb();
+})}
+/* Messenger: phones open the share screen for links; text (or desktop) is copied and Messenger opens so you can paste */
+/* share sheet: native share where available, plus direct links to the common apps */
+function openShare(text,url,title){
+var mob=/android|iphone|ipad|ipod/i.test(navigator.userAgent),enc=encodeURIComponent;
+var ov=document.createElement("div");ov.className="sheet";ov.setAttribute("role","dialog");ov.setAttribute("aria-label","Share");
+var bx=document.createElement("div");bx.className="sbox";
+var h=document.createElement("h3");h.textContent="Share "+(title||"");bx.appendChild(h);
+var p=document.createElement("p");p.textContent=url||text;bx.appendChild(p);
+var g=document.createElement("div");g.className="sgrid";
+function close(){if(ov.parentNode)ov.parentNode.removeChild(ov)}
+function add(label,fn,cls){var b=document.createElement("button");b.type="button";b.textContent=label;if(cls)b.className=cls;b.onclick=function(){fn(b)};g.appendChild(b)}
+function nav(u){location.href=u;close()}
+function opn(u){window.open(u,"_blank","noopener");close()}
+function copyOpen(site,b){
+var w=mob?null:window.open("about:blank","_blank");
+copyRaw(text).then(function(ok){if(mob)location.href=site;else if(w)w.location.href=site;b.textContent=ok?"Copied, paste it":"Open the app";setTimeout(close,1800)});
+}
+if(navigator.share)add("More apps...",function(){
+var d=url?{title:title||"",url:url}:{title:title||"",text:text};
+navigator.share(d).then(close,function(e){if(e&&e.name!=="AbortError")p.textContent="The share sheet could not open. Use one of the buttons below."});
+},"pri");
+add("Messenger",function(b){sendMsgr(text,url,b)});
+add("Facebook",function(b){url?opn("https://www.facebook.com/sharer/sharer.php?u="+enc(url)):copyOpen("https://www.facebook.com/",b)});
+add("WhatsApp",function(){opn("https://wa.me/?text="+enc(text))});
+add("Telegram",function(){opn("https://t.me/share/url?url="+enc(url||" ")+"&text="+enc(url?(title||""):text))});
+add("Viber",function(){nav("viber://forward?text="+enc(text))});
+add("X (Twitter)",function(){opn("https://twitter.com/intent/tweet?text="+enc(url?(title||""):text)+(url?"&url="+enc(url):""))});
+add("Email",function(){nav("mailto:?subject="+enc(title||"JBL rental")+"&body="+enc(text))});
+add("SMS",function(){nav("sms:?&body="+enc(text))});
+add("Copy",function(b){copyRaw(text).then(function(ok){b.textContent=ok?"Copied!":"Select + copy"})});
+bx.appendChild(g);
+var x=document.createElement("button");x.type="button";x.className="x";x.textContent="Close";x.onclick=close;bx.appendChild(x);
+ov.onclick=function(e){if(e.target===ov)close()};
+ov.appendChild(bx);document.body.appendChild(ov);x.focus();
+}
+function sendMsgr(text,url,btn){
+var old=btn.dataset.l||btn.textContent;btn.dataset.l=old;
+function flash(t){btn.textContent=t;setTimeout(function(){btn.textContent=old},2200)}
+var mob=/android|iphone|ipad|ipod/i.test(navigator.userAgent);
+if(mob&&url){copyRaw(text);location.href="fb-messenger://share/?link="+encodeURIComponent(url);flash("Opening...");return}
+var win=mob?null:window.open("about:blank","_blank");
+copyRaw(text).then(function(ok){
+if(mob)location.href="fb-messenger://";
+else if(win)win.location.href="https://www.messenger.com/";
+flash(ok?"Copied, paste it":"Select + copy");
+});
+}
 var contact=document.getElementById("contact");
 try{contact.value=localStorage.getItem(KEY+"-contact2")||""}catch(e){}
 contact.addEventListener("input",function(){try{localStorage.setItem(KEY+"-contact2",contact.value)}catch(e){}});
@@ -570,6 +657,28 @@ document.getElementById("dl").onclick=function(){
       try{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},4000);hint.textContent="Image downloaded. Post it with your caption."}catch(e){hint.textContent="Download is not available right now."}
     },"image/png");
   });
+};
+document.getElementById("shimg").onclick=function(){
+var hint=document.getElementById("hint");
+(document.fonts&&document.fonts.load?Promise.all([document.fonts.load("700 40px \"Source Serif 4\""),document.fonts.load("500 40px \"Space Grotesk\"")]):Promise.resolve()).catch(function(){}).then(function(){
+poster().toBlob(function(b){
+if(!b){hint.textContent="Could not create the image. Try again.";return}
+var m=view.getFullYear()+"-"+(view.getMonth()<9?"0":"")+(view.getMonth()+1),fn="jbl-availability-"+m+".png",f=null;
+try{f=new File([b],fn,{type:"image/png"})}catch(e){}
+if(f&&navigator.canShare&&navigator.canShare({files:[f]})){
+navigator.share({files:[f]}).then(function(){hint.textContent="Shared."}).catch(function(e){if(!e||e.name!=="AbortError")hint.textContent="Could not open the share sheet. Tap again, or use Download as image."});
+}else{
+try{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},4000);hint.textContent="This browser can't share images directly, so the image was downloaded. Attach it in the app you want to share to."}catch(e){hint.textContent="Sharing is not available right now."}
+}
+},"image/png");
+});
+};
+document.getElementById("addrow").onclick=function(){
+agr.push({id:Date.now()+Math.random(),name:"",address:"",amount:null,start:"",end:"",month:mkey(),file:"",hasPdf:false});
+asave();renderAgr();
+var ins=document.querySelectorAll("#rows tr:last-child input");
+if(ins.length)ins[ins.length-1].focus();
+note("Blank row added under "+mlabel()+". Type the amount (and the rental dates to tick the calendar).");
 };
 render();
 })();
