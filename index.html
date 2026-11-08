@@ -143,6 +143,7 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
 .mfb .x{margin-top:0;flex:1}
 .sbox .x.pri{background:var(--rent);color:var(--rent-ink);border-color:var(--rent)}
 .mfe{color:var(--rent)!important;min-height:1.2em;margin:0 0 6px!important}
+.sbox .x.danger{background:#c62800;color:#fff;border-color:#c62800}
 </style>
 </head>
 <body>
@@ -228,7 +229,7 @@ function list(){
     var row=document.createElement("div");row.className="row";
     var t=document.createElement("span");t.textContent=fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"");
     var b=document.createElement("button");b.textContent="Remove";
-    b.onclick=function(){rentals=rentals.filter(function(x){return x!==r&&!(x[0]===r[0]&&x[1]===r[1])});save();render()};
+    b.onclick=function(){askConfirm("Remove this rental?",fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"")+" will be removed from the calendar.","Remove",function(){rentals=rentals.filter(function(x){return x!==r&&!(x[0]===r[0]&&x[1]===r[1])});save();render()})};
     row.appendChild(t);row.appendChild(b);L.appendChild(row)});
 }
 document.getElementById("days").addEventListener("click",function(e){
@@ -240,8 +241,8 @@ document.getElementById("days").addEventListener("click",function(e){
     rentals.push([a,z]);save();
     hint.textContent="Rental added: "+fmt(a)+(a!==z?" to "+fmt(z):"")+".";
   }else if(k>-1){
-    var r=rentals[k];rentals.splice(k,1);save();
-    hint.textContent="Removed the rental "+fmt(r[0])+" to "+fmt(r[1])+".";
+    var r=rentals[k];askConfirm("Remove this rental?",fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"")+" will be removed from the calendar.","Remove",function(){var i=rentals.indexOf(r);if(i>-1)rentals.splice(i,1);save();hint.textContent="Removed the rental "+fmt(r[0])+" to "+fmt(r[1])+".";render()},function(){hint.textContent="Rental kept."});
+    hint.textContent="Tap Remove to confirm, or Cancel to keep the rental.";
   }else{pending=s;hint.textContent="Start: "+fmt(s)+". Now tap the end date (tap the same day for a one-day rental)."}
   render();
 });
@@ -426,7 +427,7 @@ function renderAgr(){
     if(a.hasPdf){var vb=cell("",document.createElement("button"));vb.type="button";vb.className="vw";vb.textContent="View";vb.setAttribute("aria-label","View uploaded PDF for "+(a.name||"this agreement"));vb.onclick=function(){viewPdf(a)}}
     else{var at=cell("",document.createElement("label"));at.className="att";at.appendChild(document.createTextNode("Attach"));var ai=document.createElement("input");ai.type="file";ai.accept="application/pdf,.pdf,image/*";ai.setAttribute("aria-label","Attach a PDF or image");ai.onchange=function(){var f=ai.files&&ai.files[0];if(!f)return;a.file=f.name;keepPdf(a,f).then(function(){asave();renderAgr();note(f.name+" attached.")})};at.appendChild(ai)}
     var rm=cell("",document.createElement("button"));rm.textContent="\u00D7";rm.setAttribute("aria-label","Remove agreement");
-    rm.onclick=function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()};
+    rm.onclick=function(){askConfirm("Delete this agreement?",(a.name?a.name+(a.amount?" ("+peso(a.amount)+")":""):(a.amount?peso(a.amount):"This row"))+" will be deleted, along with its attached file and its dates on the calendar. This can't be undone.","Delete",function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()})};
     tb.appendChild(tr);
   });
   showTotal();
@@ -608,6 +609,25 @@ bx.appendChild(g);
 var x=document.createElement("button");x.type="button";x.className="x";x.textContent="Close";x.onclick=close;bx.appendChild(x);
 ov.onclick=function(e){if(e.target===ov)close()};
 ov.appendChild(bx);document.body.appendChild(ov);x.focus();
+}
+/* confirmation dialog for remove / delete */
+function askConfirm(title,msg,okLabel,onYes,onNo){
+var prev=document.activeElement;
+var ov=document.createElement("div");ov.className="sheet";ov.setAttribute("role","alertdialog");ov.setAttribute("aria-label",title);
+var bx=document.createElement("div");bx.className="sbox";
+var h=document.createElement("h3");h.textContent=title;
+var p=document.createElement("p");p.textContent=msg;
+var row=document.createElement("div");row.className="mfb";
+var no=document.createElement("button");no.type="button";no.className="x";no.textContent="Cancel";
+var yes=document.createElement("button");yes.type="button";yes.className="x danger";yes.textContent=okLabel||"Remove";
+row.appendChild(no);row.appendChild(yes);bx.appendChild(h);bx.appendChild(p);bx.appendChild(row);ov.appendChild(bx);
+function close(){document.removeEventListener("keydown",key);if(ov.parentNode)ov.parentNode.removeChild(ov);try{if(prev&&prev.focus)prev.focus()}catch(e){}}
+function key(e){if(e.key==="Escape"){close();if(onNo)onNo()}}
+no.onclick=function(){close();if(onNo)onNo()};
+yes.onclick=function(){close();onYes()};
+ov.onclick=function(e){if(e.target===ov){close();if(onNo)onNo()}};
+document.addEventListener("keydown",key);
+document.body.appendChild(ov);no.focus();
 }
 function sendMsgr(text,url,btn){
 var old=btn.dataset.l||btn.textContent;btn.dataset.l=old;
