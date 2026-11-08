@@ -144,6 +144,18 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
 .sbox .x.pri{background:var(--rent);color:var(--rent-ink);border-color:var(--rent)}
 .mfe{color:var(--rent)!important;min-height:1.2em;margin:0 0 6px!important}
 .sbox .x.danger{background:#c62800;color:#fff;border-color:#c62800}
+.chk{display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0 10px}
+.chk input{width:18px;height:18px;accent-color:var(--rent)}
+.bkl{display:block;font-size:.8rem;color:var(--mute);margin-bottom:3px}
+#bkmail{font:inherit;font-size:1rem;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;min-width:0;margin-bottom:10px}
+#bkmail:focus{outline:2px solid var(--rent)}
+.info .btnrow button{background:var(--rent);color:var(--rent-ink);border:none;border-radius:10px;font-weight:800}
+.info .btnrow button.sec{background:#0a7cff;color:#fff}
+.info .btnrow button:focus-visible,.imp:focus-within{outline:2px solid var(--rent);outline-offset:2px}
+.imp{display:block;text-align:center;margin-top:8px;border:2px solid var(--rent);color:var(--rent);border-radius:10px;padding:11px;font-weight:800;font-size:.92rem;cursor:pointer;position:relative}
+.imp input{position:absolute;opacity:0;width:1px;height:1px}
+.mfb.col{flex-direction:column}
+.mfb.col .x{flex:none}
 </style>
 </head>
 <body>
@@ -169,6 +181,16 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
   <div class="btnrow"><button id="dl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download image</button><button id="shimg" class="msg" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg>Share image</button></div>
 </section>
 <section class="info" id="info" aria-label="Client details"></section>
+<section class="info" id="backup" aria-label="Backup and restore">
+<h2>Backup &amp; restore</h2>
+<p class="sub">Save your rentals, agreements and profit to a file. Import it on a new device to get everything back.</p>
+<label class="chk"><input type="checkbox" id="bkfiles" checked> Include attached PDFs and images</label>
+<label class="bkl" for="bkmail">Email address for backups (optional)</label>
+<input id="bkmail" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email">
+<div class="btnrow"><button id="bkexp" type="button">Export backup</button><button id="bkmailb" type="button" class="sec">Email backup</button></div>
+<label class="imp">Import backup<input id="bkimp" type="file" accept="application/json,.json"></label>
+<p class="note" id="bknote" aria-live="polite"></p>
+</section>
 <section class="list" id="list"></section>
 </div>
 <aside class="mon" aria-label="Agreement monitoring">
@@ -732,6 +754,106 @@ if(f)keepPdf(row,f).then(fin);else fin();
 q("mfn").focus();
 }
 document.getElementById("addrow").onclick=openManual;
+/* ---- backup, restore and email ---- */
+var bkmail=document.getElementById("bkmail"),MK=KEY+"-bkmail";
+try{bkmail.value=localStorage.getItem(MK)||""}catch(e){}
+bkmail.addEventListener("input",function(){try{localStorage.setItem(MK,bkmail.value)}catch(e){}});
+function bnote(t){document.getElementById("bknote").textContent=t}
+function blobToUrl(b){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=function(){rej(r.error)};r.readAsDataURL(b)})}
+function urlToBlob(u){var i=u.indexOf(","),m=/data:([^;,]*)/.exec(u.slice(0,i)),bin=atob(u.slice(i+1)),n=bin.length,a=new Uint8Array(n);for(var k=0;k<n;k++)a[k]=bin.charCodeAt(k);return new Blob([a],{type:(m&&m[1])||"application/octet-stream"})}
+function buildBackup(withFiles){
+var data={app:"jbl-rental-tracker",version:1,exported:new Date().toISOString(),rentals:rentals,agreements:agr,contact:contact.value,files:{}};
+var p=Promise.resolve();
+if(withFiles)agr.forEach(function(a){if(!a.hasPdf)return;
+p=p.then(function(){return pdfGet(a.id)}).then(function(bl){if(!bl)return;return blobToUrl(bl).then(function(u){data.files[String(a.id)]={name:a.file||"",data:u}})}).catch(function(){})});
+return p.then(function(){return data});
+}
+function backupFile(){
+return buildBackup(document.getElementById("bkfiles").checked).then(function(d){
+return {data:d,fn:"jbl-backup-"+iso(new Date())+".json",blob:new Blob([JSON.stringify(d)],{type:"application/json"})};
+});
+}
+function saveBlob(b,fn){
+if(dls)return dls.save({filename:fn,data:b});
+return new Promise(function(res){var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},4000);res()});
+}
+function sizeTxt(b){return b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB"}
+function backupSummary(){
+var t=0;agr.forEach(function(a){if(a.amount)t+=a.amount});
+return rentals.length+" rentals and "+agr.length+" agreements, total profit "+peso(t)+".";
+}
+document.getElementById("bkexp").onclick=function(){
+bnote("Preparing backup...");
+backupFile().then(function(o){return saveBlob(o.blob,o.fn).then(function(){bnote("Backup saved as "+o.fn+" ("+sizeTxt(o.blob.size)+"). Keep it somewhere safe, like Google Drive or email it to yourself.")})})
+.catch(function(e){if(e&&e.code==="declined")bnote("Export cancelled.");else bnote("Could not create the backup. Try again.")});
+};
+document.getElementById("bkmailb").onclick=function(){
+bnote("Preparing backup...");
+backupFile().then(function(o){
+var addr=bkmail.value.trim().replace(/[^\w.@+,\-]/g,""),subject="JBL rental backup "+iso(new Date()),sum=backupSummary(),f=null;
+try{f=new File([o.blob],o.fn,{type:"application/json"})}catch(e){}
+function viaMail(){
+saveBlob(o.blob,o.fn).then(function(){
+bnote("Backup downloaded as "+o.fn+". Attach it to the email that opens.");
+location.href="mailto:"+addr+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent("JBL rental backup: "+sum+"\n\nAttach the file "+o.fn+" (just downloaded) to this email.");
+});
+}
+if(f&&navigator.canShare&&navigator.canShare({files:[f]})){
+navigator.share({files:[f],title:subject,text:"JBL rental backup: "+sum}).then(function(){bnote("Choose your email app in the share sheet to send it"+(addr?" to "+addr:"")+".")},function(e){if(e&&e.name==="AbortError")bnote("Email cancelled.");else viaMail()});
+}else viaMail();
+}).catch(function(){bnote("Could not create the backup. Try again.")});
+};
+function chooseImport(msg,onMerge,onReplace){
+var ov=document.createElement("div");ov.className="sheet";ov.setAttribute("role","dialog");ov.setAttribute("aria-label","Import backup");
+var bx=document.createElement("div");bx.className="sbox";
+var h=document.createElement("h3");h.textContent="Import this backup?";
+var p=document.createElement("p");p.textContent=msg;
+var row=document.createElement("div");row.className="mfb col";
+function close(){document.removeEventListener("keydown",key);if(ov.parentNode)ov.parentNode.removeChild(ov)}
+function key(e){if(e.key==="Escape")close()}
+function btn(l,c,fn){var b=document.createElement("button");b.type="button";b.className="x"+(c?" "+c:"");b.textContent=l;b.onclick=function(){close();if(fn)fn()};row.appendChild(b);return b}
+btn("Merge with current data","pri",onMerge);
+btn("Replace all current data","danger",onReplace);
+var c=btn("Cancel","",function(){bnote("Import cancelled.")});
+bx.appendChild(h);bx.appendChild(p);bx.appendChild(row);ov.appendChild(bx);
+ov.onclick=function(e){if(e.target===ov)close()};
+document.addEventListener("keydown",key);document.body.appendChild(ov);c.focus();
+}
+function applyBackup(d,mode){
+var files=d.files||{},DT=/^\d{4}-\d\d-\d\d$/,MT=/^\d{4}-\d\d$/;
+var rs=(Array.isArray(d.rentals)?d.rentals:[]).filter(function(r){return Array.isArray(r)&&DT.test(r[0])&&DT.test(r[1])}).map(function(r){return[r[0],r[1]]});
+var ag=(Array.isArray(d.agreements)?d.agreements:[]).filter(function(a){return a&&typeof a==="object"}).map(function(a){
+var id=a.id!=null?a.id:Date.now()+Math.random(),st=DT.test(a.start)?a.start:"",en=DT.test(a.end)?a.end:st;
+return {id:id,name:String(a.name||""),address:String(a.address||""),amount:typeof a.amount==="number"?a.amount:toNum(a.amount),start:st,end:st?en:"",month:MT.test(a.month)?a.month:(st?st.slice(0,7):mkey()),file:String(a.file||""),hasPdf:!!files[String(id)]};
+});
+var olds=[],keep=[];
+if(mode==="replace"){agr.forEach(function(a){if(a.hasPdf)olds.push(a.id)});rentals=rs;agr=ag;keep=ag}
+else{
+rs.forEach(function(r){if(!rentals.some(function(x){return x[0]===r[0]&&x[1]===r[1]}))rentals.push(r)});
+ag.forEach(function(a){if(!agr.some(function(x){return String(x.id)===String(a.id)})){agr.push(a);keep.push(a)}});
+}
+var p=Promise.all(olds.map(function(i){return pdfDel(i)}));
+keep.forEach(function(a){if(!a.hasPdf)return;
+p=p.then(function(){return pdfPut(a.id,urlToBlob(files[String(a.id)].data))}).catch(function(){a.hasPdf=false})});
+return p.then(function(){
+if(mode==="replace"&&typeof d.contact==="string"){contact.value=d.contact;try{localStorage.setItem(KEY+"-contact2",d.contact)}catch(e){}}
+save();asave();render();
+bnote((mode==="replace"?"Restored ":"Merged ")+rs.length+" rentals and "+ag.length+" agreements"+(keep.some(function(a){return a.hasPdf})?", with their files":"")+".");
+});
+}
+document.getElementById("bkimp").addEventListener("change",function(e){
+var f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
+bnote("Reading "+f.name+"...");
+f.text().then(function(t){
+var d=JSON.parse(t);
+if(!d||d.app!=="jbl-rental-tracker"||!Array.isArray(d.agreements)&&!Array.isArray(d.rentals))throw new Error("bad");
+var nf=d.files?Object.keys(d.files).length:0;
+chooseImport("This backup has "+(d.rentals||[]).length+" rentals and "+(d.agreements||[]).length+" agreements"+(nf?" with "+nf+" attached files":"")+(d.exported?", saved "+new Date(d.exported).toLocaleDateString():"")+". Merge adds what is missing and keeps what you have. Replace wipes the current data first.",
+function(){applyBackup(d,"merge").catch(function(){bnote("The import hit a problem. Try again.")})},
+function(){applyBackup(d,"replace").catch(function(){bnote("The import hit a problem. Try again.")})});
+bnote("");
+}).catch(function(){bnote("That file is not a JBL backup. Choose the .json file you exported.")});
+});
 render();
 })();
 </script>
