@@ -156,11 +156,63 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
 .imp input{position:absolute;opacity:0;width:1px;height:1px}
 .mfb.col{flex-direction:column}
 .mfb.col .x{flex:none}
+.srow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}
+.srow b{display:block;font-weight:600;word-break:break-word}
+.srow small{color:var(--mute)}
+.srow .amt{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.srow .amt.none{color:var(--mute);font-weight:500}
+.srow.sum{border-top:2px solid var(--line);font-weight:800}
+.list .lnote{color:var(--mute);font-size:.82rem;margin:8px 0 0}
+.sumlink{display:block;text-align:center;margin-top:8px;border:2px solid var(--rent);color:var(--rent);border-radius:10px;padding:11px;font-weight:800;font-size:.92rem;text-decoration:none}
+.sumlink:hover{background:var(--rent);color:var(--rent-ink)}
+.sumlink:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:none;border-bottom:3px solid transparent;padding:10px 18px;font-weight:700;color:var(--mute);margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--rent);border-bottom-color:var(--rent)}
+.tabs button:hover{color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--rent);outline-offset:-2px}
+.sm-wrap{max-width:980px;margin:0 auto}
+.sm-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.sm-ctl label{font-size:.85rem;color:var(--mute)}
+.sm-ctl select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:.95rem;color:inherit}
+.sm-ctl select:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.sm-ctl .tgl{margin-left:auto}
+.sm-asof{color:var(--mute);font-size:.82rem;margin:0 0 12px}
+.sm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.sm-stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.sm-stat small{display:block;color:var(--mute);font-size:.78rem}
+.sm-stat b{display:block;font-family:var(--serif);font-size:1.3rem;margin-top:2px;word-break:break-word}
+.sm-stat.sm-hero{background:var(--rent);border-color:var(--rent);color:var(--rent-ink)}
+.sm-stat.sm-hero small{color:var(--rent-ink);opacity:.9}
+.sm-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.sm-card h2{font-family:var(--serif);font-size:1.05rem;margin:0 0 8px}
+.sm-mrow{display:grid;grid-template-columns:minmax(90px,130px) 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:.9rem}
+.sm-mrow:first-child{border-top:none}
+.sm-mrow small{display:block;color:var(--mute);font-size:.76rem}
+.sm-bar{height:10px;background:var(--line);border-radius:999px;overflow:hidden}
+.sm-bar i{display:block;height:100%;background:var(--rent);border-radius:999px}
+.sm-amt{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;text-align:right}
+.sm-amt.sm-none{color:var(--mute);font-weight:500}
+.sm-sum{font-weight:800}
+.sm-gh{display:flex;justify-content:space-between;gap:10px;margin:14px 0 2px;font-weight:700;font-size:.92rem}
+.sm-gh:first-child{margin-top:0}
+.sm-arow{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);font-size:.9rem}
+.sm-arow b{display:block;font-weight:600;word-break:break-word}
+.sm-arow small{display:block;color:var(--mute);font-size:.78rem;word-break:break-word}
+.sm-arow .sm-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none}
+.sm-vw{background:none;border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:.76rem}
+.sm-vw:hover{border-color:var(--rent);color:var(--rent)}
+.sm-vw:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.sm-empty,.sm-note{color:var(--mute);font-size:.85rem;margin:6px 0}
+@media print{.tabs,.tgl,.sm-ctl,.sm-vw{display:none!important}body{background:#fff;color:#000;padding:0}.sm-card,.sm-stat{break-inside:avoid}}
 </style>
 </head>
 <body>
 <main>
 <div class="top"><h1>JBL rental calendar</h1><button class="tgl" id="theme" type="button" aria-pressed="false">Dark mode</button></div>
+<nav class="tabs" role="tablist" aria-label="Pages"><button type="button" role="tab" id="tabCal" aria-selected="true" aria-controls="viewCal">Calendar</button><button type="button" role="tab" id="tabSum" aria-selected="false" aria-controls="viewSum">Summary</button></nav>
+<div id="viewCal" role="tabpanel" aria-labelledby="tabCal">
 <div class="layout">
 <div class="left">
 <div id="status" class="status" aria-live="polite"></div>
@@ -172,7 +224,7 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
   </div>
   <div class="grid" id="wd"></div>
   <div class="grid" id="days"></div>
-  <p class="hint" id="hint">Tap a start date, then an end date to mark a rental. Tap a rented date to remove that rental.</p>
+  <p class="hint" id="hint">Tap a start date, then an end date to mark a rental. Rentals that have an agreement are removed from the Agreements list.</p>
   <div class="legend"><span><i style="background:var(--rent)"></i>Rented</span><span><i style="border:1px solid var(--today)"></i>Today</span></div>
 </section>
 <section class="share on" id="share">
@@ -207,6 +259,18 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
   <p class="note" id="note">Each PDF or image is read in your browser (scanned PDFs and images are read with OCR, which needs internet the first time). Name, address, rental dates and rental fee are filled in and filed under the month the rental starts. No agreement file? Tap + Add manually and type the amount yourself. Check the fields and fix any that were read wrong.</p>
 </aside>
 </div>
+</div>
+<div id="viewSum" role="tabpanel" aria-labelledby="tabSum" hidden>
+<div class="sm-wrap">
+<div class="sm-ctl"><label for="syr">Year</label><select id="syr"></select><button class="tgl" id="sprint" type="button">Print / save as PDF</button></div>
+<p class="sm-asof" id="sasof"></p>
+<section class="sm-stats" id="sstats" aria-label="Totals"></section>
+<section class="sm-card" aria-label="Profit by month"><h2>Profit by month</h2><div id="smonths"></div></section>
+<section class="sm-card" aria-label="Agreements"><h2>Agreements</h2><div id="sagrs"></div></section>
+<section class="sm-card" id="scoCard" aria-label="Calendar only rentals" hidden><h2>Calendar only (no agreement)</h2><div id="sco"></div></section>
+<p class="sm-empty">This page is read-only. To remove an agreement, delete its row in the Agreements list for that month on the Calendar tab.</p>
+</div>
+</div>
 </main>
 <script>
 (function(){
@@ -216,6 +280,7 @@ try{var raw=localStorage.getItem(KEY);if(raw)rentals=JSON.parse(raw)||[]}catch(e
 function save(){try{localStorage.setItem(KEY,JSON.stringify(rentals))}catch(e){}}
 function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
 function fmt(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function linkedAgr(r){return agr.some(function(a){return a.start===r[0]&&(a.end||a.start)===r[1]})}
 function find(s){for(var i=0;i<rentals.length;i++)if(s>=rentals[i][0]&&s<=rentals[i][1])return i;return -1}
 var todayS=iso(new Date());
 var wd=document.getElementById("wd");
@@ -243,28 +308,19 @@ function status(){
     var nx=rentals.filter(function(r){return r[0]>todayS}).sort(function(a,b){return a[0]<b[0]?-1:1})[0];
     el.className="status off";el.innerHTML="JBL is available today"+(nx?"<small>Next rental starts "+fmt(nx[0])+"</small>":"<small>No upcoming rentals</small>")}
 }
-function list(){
-  var L=document.getElementById("list");L.innerHTML="";
-  if(!rentals.length)return;
-  var h=document.createElement("h2");h.textContent="Rentals";L.appendChild(h);
-  rentals.slice().sort(function(a,b){return a[0]<b[0]?-1:1}).forEach(function(r){
-    var row=document.createElement("div");row.className="row";
-    var t=document.createElement("span");t.textContent=fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"");
-    var b=document.createElement("button");b.textContent="Remove";
-    b.onclick=function(){askConfirm("Remove this rental?",fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"")+" will be removed from the calendar.","Remove",function(){rentals=rentals.filter(function(x){return x!==r&&!(x[0]===r[0]&&x[1]===r[1])});save();render()})};
-    row.appendChild(t);row.appendChild(b);L.appendChild(row)});
-}
+function list(){var L=document.getElementById("list");if(L)L.innerHTML=""}
 document.getElementById("days").addEventListener("click",function(e){
   var s=e.target.dataset&&e.target.dataset.s;if(!s)return;
   var hint=document.getElementById("hint"),k=find(s);
   if(pending){
     var a=pending<s?pending:s,z=pending<s?s:pending;pending=null;
+    if(rentals.some(function(r){return r[0]<=z&&r[1]>=a&&linkedAgr(r)})){hint.textContent="That range overlaps a rental that has an agreement. Delete that agreement first to free the dates.";render();return}
     rentals=rentals.filter(function(r){return r[1]<a||r[0]>z});
     rentals.push([a,z]);save();
     hint.textContent="Rental added: "+fmt(a)+(a!==z?" to "+fmt(z):"")+".";
   }else if(k>-1){
-    var r=rentals[k];askConfirm("Remove this rental?",fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"")+" will be removed from the calendar.","Remove",function(){var i=rentals.indexOf(r);if(i>-1)rentals.splice(i,1);save();hint.textContent="Removed the rental "+fmt(r[0])+" to "+fmt(r[1])+".";render()},function(){hint.textContent="Rental kept."});
-    hint.textContent="Tap Remove to confirm, or Cancel to keep the rental.";
+    var r=rentals[k];if(linkedAgr(r)){var rm0=new Date(+r[0].slice(0,4),+r[0].slice(5,7)-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});hint.textContent="This rental has an agreement, so it can't be removed here. Delete its row in the Agreements list for "+rm0+" instead."}else{askConfirm("Remove this rental?",fmt(r[0])+(r[1]!==r[0]?" to "+fmt(r[1]):"")+" will be removed from the calendar.","Remove",function(){var i=rentals.indexOf(r);if(i>-1)rentals.splice(i,1);save();hint.textContent="Removed the rental "+fmt(r[0])+" to "+fmt(r[1])+".";render()},function(){hint.textContent="Rental kept."});
+    hint.textContent="Tap Remove to confirm, or Cancel to keep the rental."}
   }else{pending=s;hint.textContent="Start: "+fmt(s)+". Now tap the end date (tap the same day for a one-day rental)."}
   render();
 });
@@ -366,7 +422,7 @@ function mlabel(){return view.toLocaleDateString(undefined,{month:"long",year:"n
 function totalNow(){var t=0;agr.forEach(function(a){if(a.month===mkey()&&a.amount)t+=a.amount});return t}
 function yearStats(){var y=String(view.getFullYear()),t=0,c=0;agr.forEach(function(a){if(a.amount&&String(a.month||"").slice(0,4)===y){t+=a.amount;c++}});return{y:y,t:t,c:c}}
 function showTotal(){
-  document.getElementById("tval").textContent=peso(totalNow());
+  document.getElementById("tval").textContent=peso(totalNow());list();
   var ys=yearStats();
   document.getElementById("ylabel").textContent="Total profit for "+ys.y;
   document.getElementById("ycount").textContent=ys.c+(ys.c===1?" rental":" rentals")+" this year";
@@ -430,7 +486,7 @@ function renderAgr(){
     var tr=document.createElement("tr");
     function cell(cls,el){var td=document.createElement("td");if(cls)td.className=cls;td.appendChild(el);tr.appendChild(td);return el}
     var n=cell("",document.createElement("input"));n.type="text";n.value=a.name||"";n.setAttribute("aria-label","Name");
-    n.onchange=function(){a.name=n.value;asave()};
+    n.onchange=function(){a.name=n.value;asave();list()};
     var ad=cell("",document.createElement("textarea"));ad.rows=2;ad.value=a.address||"";ad.setAttribute("aria-label","Address");
     ad.onchange=function(){a.address=ad.value;asave()};
     var dr=cell("",document.createElement("textarea"));dr.rows=2;dr.value=fmtRange(a.start,a.end);dr.setAttribute("aria-label","Rental dates");dr.placeholder="Oct 10, 2026 to Oct 11, 2026";
@@ -449,7 +505,7 @@ function renderAgr(){
     if(a.hasPdf){var vb=cell("",document.createElement("button"));vb.type="button";vb.className="vw";vb.textContent="View";vb.setAttribute("aria-label","View uploaded PDF for "+(a.name||"this agreement"));vb.onclick=function(){viewPdf(a)}}
     else{var at=cell("",document.createElement("label"));at.className="att";at.appendChild(document.createTextNode("Attach"));var ai=document.createElement("input");ai.type="file";ai.accept="application/pdf,.pdf,image/*";ai.setAttribute("aria-label","Attach a PDF or image");ai.onchange=function(){var f=ai.files&&ai.files[0];if(!f)return;a.file=f.name;keepPdf(a,f).then(function(){asave();renderAgr();note(f.name+" attached.")})};at.appendChild(ai)}
     var rm=cell("",document.createElement("button"));rm.textContent="\u00D7";rm.setAttribute("aria-label","Remove agreement");
-    rm.onclick=function(){askConfirm("Delete this agreement?",(a.name?a.name+(a.amount?" ("+peso(a.amount)+")":""):(a.amount?peso(a.amount):"This row"))+" will be deleted, along with its attached file and its dates on the calendar. This can't be undone.","Delete",function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()})};
+    rm.onclick=function(){askConfirm("Delete this agreement?",(a.name?a.name+(a.amount?" ("+peso(a.amount)+")":""):(a.amount?peso(a.amount):"This row"))+" will be deleted, along with its attached file, its dates on the calendar and its place in the summary. This can't be undone.","Delete",function(){agr=agr.filter(function(x){return x!==a});asave();pdfDel(a.id);if(a.start&&a.end){syncRental(a.start,a.end,"","");render()}else renderAgr()})};
     tb.appendChild(tr);
   });
   showTotal();
@@ -854,6 +910,89 @@ function(){applyBackup(d,"replace").catch(function(){bnote("The import hit a pro
 bnote("");
 }).catch(function(){bnote("That file is not a JBL backup. Choose the .json file you exported.")});
 });
+/* ---- summary tab (same file, reads the live data) ---- */
+(function(){
+var MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function $(i){return document.getElementById(i)}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function pe(n){return "\u20B1"+(n||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function mlab(k){var p=k.split("-");return MN[+p[1]-1]+" "+p[0]}
+function dfmt(x){var q=x.split("-");return MN[+q[1]-1].slice(0,3)+" "+(+q[2])+", "+q[0]}
+function fr(a,z){return !a?"No dates":(!z||z===a)?dfmt(a):dfmt(a)+" to "+dfmt(z)}
+function dcount(a,z){var p=a.split("-"),q=z.split("-");return Math.round((Date.UTC(+q[0],+q[1]-1,+q[2])-Date.UTC(+p[0],+p[1]-1,+p[2]))/864e5)+1}
+function openFile(a){
+var w=window.open("","_blank");
+pdfGet(a.id).then(function(b){if(!b){if(w)w.close();alert("This file is not saved in this browser.");return}var u=URL.createObjectURL(b);if(w)w.location.href=u;else location.href=u}).catch(function(){if(w)w.close();alert("Could not open the saved file.")});
+}
+function renderSum(){
+var R0=rentals.filter(function(r){return Array.isArray(r)&&/^\d{4}-\d\d-\d\d$/.test(r[0])&&/^\d{4}-\d\d-\d\d$/.test(r[1])}),G0=agr.filter(function(a){return a&&/^\d{4}-\d\d$/.test(a.month||"")});
+var ysel=$("syr"),cur=ysel.value||"all",ys={};
+G0.forEach(function(a){ys[a.month.slice(0,4)]=1});R0.forEach(function(r){ys[r[0].slice(0,4)]=1});
+ysel.innerHTML="";var o=el("option",null,"All years");o.value="all";ysel.appendChild(o);
+Object.keys(ys).sort().reverse().forEach(function(y){var op=el("option",null,y);op.value=y;ysel.appendChild(op)});
+ysel.value=(cur==="all"||ys[cur])?cur:"all";cur=ysel.value;
+function inYear(k){return cur==="all"||k.slice(0,4)===cur}
+var A=G0.filter(function(a){return inYear(a.month)}),R=R0.filter(function(r){return inYear(r[0])});
+var total=0,paid=0;A.forEach(function(a){if(a.amount>0){total+=a.amount;paid++}});
+var dayN=0;R.forEach(function(r){dayN+=dcount(r[0],r[1])});
+var M={};
+A.forEach(function(a){var m=M[a.month]=M[a.month]||{n:0,t:0,d:0};m.n++;m.t+=a.amount>0?a.amount:0});
+R.forEach(function(r){var k=r[0].slice(0,7),m=M[k]=M[k]||{n:0,t:0,d:0};m.d+=dcount(r[0],r[1])});
+var keys=Object.keys(M).sort(),best=null;keys.forEach(function(k){if(!best||M[k].t>M[best].t)best=k});
+$("sasof").textContent=(cur==="all"?"All years":cur)+" | updated "+new Date().toLocaleString();
+var S=$("sstats");S.innerHTML="";
+function stat(l,v,c){var d=el("div","sm-stat"+(c?" "+c:""));d.appendChild(el("small",null,l));d.appendChild(el("b",null,v));S.appendChild(d)}
+stat("Total profit",pe(total),"sm-hero");
+stat("Agreements",String(A.length));
+stat("Days rented",String(dayN));
+stat("Average per agreement",paid?pe(total/paid):pe(0));
+stat("Best month",best&&M[best].t>0?mlab(best)+" ("+pe(M[best].t)+")":"None yet");
+var mb=$("smonths");mb.innerHTML="";
+if(!keys.length)mb.appendChild(el("p","sm-empty","No rentals yet. Add some on the Calendar tab."));
+else{
+var mx=0;keys.forEach(function(k){if(M[k].t>mx)mx=M[k].t});
+keys.forEach(function(k){
+var r=el("div","sm-mrow"),l=el("div");l.appendChild(document.createTextNode(mlab(k)));l.appendChild(el("small",null,M[k].n+(M[k].n===1?" agreement, ":" agreements, ")+M[k].d+(M[k].d===1?" day":" days")));
+var b=el("div","sm-bar"),i=el("i");i.style.width=(mx?Math.round(M[k].t/mx*100):0)+"%";b.appendChild(i);
+r.appendChild(l);r.appendChild(b);r.appendChild(el("div","sm-amt"+(M[k].t?"":" sm-none"),M[k].t?pe(M[k].t):"No amount"));mb.appendChild(r)});
+var sm=el("div","sm-mrow sm-sum");sm.appendChild(el("div",null,"Total"));sm.appendChild(el("div"));sm.appendChild(el("div","sm-amt",pe(total)));mb.appendChild(sm);
+}
+var ab=$("sagrs");ab.innerHTML="";
+if(!A.length)ab.appendChild(el("p","sm-empty","No agreements yet."));
+keys.slice().reverse().forEach(function(k){
+var g=A.filter(function(a){return a.month===k}).sort(function(a,b){return (a.start||"9")<(b.start||"9")?-1:1});
+if(!g.length)return;
+var h=el("div","sm-gh");h.appendChild(el("span",null,mlab(k)));h.appendChild(el("span","sm-amt",pe(M[k].t)));ab.appendChild(h);
+g.forEach(function(a){
+var r=el("div","sm-arow"),l=el("div");l.appendChild(el("b",null,a.name||"Unnamed"));
+if(a.address)l.appendChild(el("small",null,a.address));
+l.appendChild(el("small",null,fr(a.start,a.end)));
+var rt=el("div","sm-r");rt.appendChild(el("span","sm-amt"+(a.amount>0?"":" sm-none"),a.amount>0?pe(a.amount):"No amount"));
+if(a.hasPdf){var v=el("button","sm-vw","View file");v.type="button";v.setAttribute("aria-label","View file for "+(a.name||"this agreement"));v.onclick=function(){openFile(a)};rt.appendChild(v)}
+r.appendChild(l);r.appendChild(rt);ab.appendChild(r)});
+});
+var CO=R.filter(function(r){return !linkedAgr(r)}).sort(function(a,b){return a[0]<b[0]?1:-1});
+var cb=$("sco");cb.innerHTML="";$("scoCard").hidden=!CO.length;
+CO.forEach(function(r){var row=el("div","sm-arow"),l=el("div"),n=dcount(r[0],r[1]);l.appendChild(el("b",null,fr(r[0],r[1])));l.appendChild(el("small",null,n+(n===1?" day":" days")));row.appendChild(l);row.appendChild(el("span","sm-amt sm-none","No agreement"));cb.appendChild(row)});
+}
+function show(w){
+var sum=w==="summary";
+$("viewCal").hidden=sum;$("viewSum").hidden=!sum;
+$("tabCal").setAttribute("aria-selected",sum?"false":"true");$("tabSum").setAttribute("aria-selected",sum?"true":"false");
+if(sum)renderSum();
+try{history.replaceState(null,"",sum?"#summary":location.pathname+location.search)}catch(e){}
+window.scrollTo(0,0);
+}
+$("tabCal").onclick=function(){show("calendar")};
+$("tabSum").onclick=function(){show("summary")};
+$("syr").onchange=renderSum;
+$("sprint").onclick=function(){window.print()};
+document.querySelector(".tabs").addEventListener("keydown",function(e){
+if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;
+var sum=$("tabSum").getAttribute("aria-selected")==="true";show(sum?"calendar":"summary");$(sum?"tabCal":"tabSum").focus();
+});
+if(location.hash==="#summary")show("summary");
+})();
 render();
 })();
 </script>
