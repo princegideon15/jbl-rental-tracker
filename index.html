@@ -130,6 +130,19 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
 .sgrid button:hover,.sbox .x:hover{border-color:var(--rent)}
 .sbox .x{width:100%;margin-top:10px}
 .sgrid button:focus-visible,.sbox .x:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
+.sbox.form{max-height:92%;overflow:auto}
+.mf label{display:block;font-size:.8rem;color:var(--mute);margin-bottom:8px}
+.mf input,.mf textarea{display:block;width:100%;min-width:0;margin-top:3px;font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;resize:none}
+.mf input:focus,.mf textarea:focus{outline:2px solid var(--rent);outline-offset:0}
+.mf2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mf2 label{min-width:0;overflow:hidden}
+.mf input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;height:44px;line-height:1.2;box-sizing:border-box;font-size:.95rem}
+.mf input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+@media (max-width:420px){.mf2{grid-template-columns:minmax(0,1fr)}}
+.mfb{display:flex;gap:8px;margin-top:6px}
+.mfb .x{margin-top:0;flex:1}
+.sbox .x.pri{background:var(--rent);color:var(--rent-ink);border-color:var(--rent)}
+.mfe{color:var(--rent)!important;min-height:1.2em;margin:0 0 6px!important}
 </style>
 </head>
 <body>
@@ -673,13 +686,32 @@ try{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.downlo
 },"image/png");
 });
 };
-document.getElementById("addrow").onclick=function(){
-agr.push({id:Date.now()+Math.random(),name:"",address:"",amount:null,start:"",end:"",month:mkey(),file:"",hasPdf:false});
-asave();renderAgr();
-var ins=document.querySelectorAll("#rows tr:last-child input");
-if(ins.length)ins[ins.length-1].focus();
-note("Blank row added under "+mlabel()+". Type the amount (and the rental dates to tick the calendar).");
+function openManual(){
+var ov=document.createElement("div");ov.className="sheet";ov.setAttribute("role","dialog");ov.setAttribute("aria-label","Add rental manually");
+var bx=document.createElement("div");bx.className="sbox form";
+bx.innerHTML='<h3>Add rental manually</h3><p>Use this when there is no agreement PDF. Only the amount is required.</p><div class="mf"><label>Name<input id="mfn" type="text" autocomplete="off"></label><label>Address<textarea id="mfa" rows="2"></textarea></label><div class="mf2"><label>Start date<input id="mfs" type="date"></label><label>End date<input id="mfe" type="date"></label></div><label>Amount (PHP)<input id="mfm" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"></label><label>Agreement PDF or image (optional)<input id="mff" type="file" accept="application/pdf,.pdf,image/*"></label></div><p class="mfe" id="mfx" role="alert"></p><div class="mfb"><button type="button" class="x" id="mfc">Cancel</button><button type="button" class="x pri" id="mfok">Save</button></div>';
+ov.appendChild(bx);document.body.appendChild(ov);
+function q(i){return bx.querySelector("#"+i)}
+function close(){if(ov.parentNode)ov.parentNode.removeChild(ov)}
+q("mfc").onclick=close;ov.onclick=function(e){if(e.target===ov)close()};
+q("mfs").onchange=function(){if(!q("mfe").value)q("mfe").value=q("mfs").value};
+q("mfok").onclick=function(){
+var amt=toNum(q("mfm").value.replace(/[^\d.,]/g,"")),st=q("mfs").value,en=q("mfe").value||st,f=q("mff").files&&q("mff").files[0];
+if(!amt||amt<=0){q("mfx").textContent="Enter the amount first.";q("mfm").focus();return}
+if(en&&!st){st=en}
+if(st&&en&&en<st){var t=st;st=en;en=t}
+var row={id:Date.now()+Math.random(),name:q("mfn").value.trim(),address:q("mfa").value.trim(),amount:amt,start:st||"",end:st?en:"",month:st?st.slice(0,7):mkey(),file:f?f.name:"",hasPdf:false};
+agr.push(row);
+var ov2=false;
+if(st)ov2=syncRental("","",st,en);
+if(st)view=new Date(+st.slice(0,4),+st.slice(5,7)-1,1);
+function fin(){asave();render();note("Added "+peso(amt)+(st?" for "+fmtRange(st,en)+(ov2?" (overlaps another rental)":""):"")+" under "+mlabel()+".")}
+close();
+if(f)keepPdf(row,f).then(fin);else fin();
 };
+q("mfn").focus();
+}
+document.getElementById("addrow").onclick=openManual;
 render();
 })();
 </script>
