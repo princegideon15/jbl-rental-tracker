@@ -15,7 +15,7 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;padding:20px clamp(14px,2.5vw,36px);transition:background .2s,color .2s}
 main{width:100%;max-width:none}
-.layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
 @media (min-width:900px){.layout{grid-template-columns:minmax(340px,480px) minmax(0,1fr)}}
 @media (min-width:1500px){.layout{grid-template-columns:minmax(380px,540px) minmax(0,1fr)}}
 .left{min-width:0}
@@ -206,6 +206,11 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
 .sm-vw:focus-visible{outline:2px solid var(--rent);outline-offset:2px}
 .sm-empty,.sm-note{color:var(--mute);font-size:.85rem;margin:6px 0}
 @media print{.tabs,.tgl,.sm-ctl,.sm-vw{display:none!important}body{background:#fff;color:#000;padding:0}.sm-card,.sm-stat{break-inside:avoid}}
+html,body{max-width:100%;overflow-x:clip}
+.tw{position:relative}
+.up,td label.att{position:relative;overflow:hidden}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+th{position:relative}
 </style>
 </head>
 <body>
@@ -251,7 +256,7 @@ td label.att input{position:absolute;opacity:0;width:1px;height:1px}
     <div class="mon-btns"><button class="add" id="addrow" type="button">+ Add manually</button><label class="up">Upload PDF or image<input id="pdf" type="file" accept="application/pdf,.pdf,image/*" multiple></label></div>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:27%">Name</th><th>Address</th><th style="width:24%">Rental dates</th><th style="width:14%;text-align:right">Amount</th><th style="width:84px">File</th><th style="width:34px"><span class="sr" style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
+    <thead><tr><th style="width:27%">Name</th><th>Address</th><th style="width:24%">Rental dates</th><th style="width:14%;text-align:right">Amount</th><th style="width:84px">File</th><th style="width:34px"><span class="vh">Remove</span></th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
   <div class="total"><span id="tlabel">Total profit</span><span id="tval">&#8369;0.00</span></div>
